@@ -1,0 +1,7 @@
+- hosts: nginx mysql promethus grafana
+  remote_user: root
+  tasks:  
+  - name: copy onekey_install_docker.sh     #上传onekey_install_docker.sh脚本
+    copy: src=/root/onekey_install_docker.sh dest=/root/
+  - name: install mysql #安装docker
+    script: /root/onekey_install_docker.sh

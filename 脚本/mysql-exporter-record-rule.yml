@@ -1,0 +1,62 @@
+groups:
+- name: mysql-alarm
+  rules:
+  - alert: "MySql服务存活报警"
+    expr: mysql_up == 0
+    for: 3s
+    labels:
+      severity: emergency
+    annotations:
+      title: "MySql服务宕机报警"
+      summary: "{{$labels.instance}}: 检测到 MySql服务 已停止运行！请重点关注！！！"
+      description: "{{$labels.instance}}: 当前 MySql服务已停止！ (当前状态mysql_up状态为:{{ $value }})"
+      btn: "点击查看详情 :玫瑰:"
+      link: "http://192.168.98.155:9090/targets"
+
+  - alert: "MySql_High_QPS过高预警"
+    expr: rate(mysql_global_status_questions[5m]) > 1500
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{$labels.instance}}: 检测到 MySql_High_QPS 过高！"
+      description: "{{$labels.instance}}: 当前 MySql操作超过 1500/秒 (当前值为:{{ $value }})"
+
+  - alert: " MySql连接过多预警"
+    expr: rate(mysql_global_status_threads_connected[5m]) > 300
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{$labels.instance}}: 检测到 MySql 连接过多！"
+      description: "{{$labels.instance}}: 当前 MySql连接超过 300个/秒 (当前值为:{{ $value }})"
+
+
+  - alert: " MySql慢查询过多预警"
+    expr: rate(mysql_global_status_slow_queries[5m]) > 5
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{$labels.instance}}: 检测到 MySql 慢查询过多！"
+      description: "{{$labels.instance}}: 当前 MySql慢查询 超过 5个/秒 (当前值为:{{ $value }})"
+
+
+  - alert: " SQL线程停止预警"
+    expr: mysql_slave_status_slave_sql_running != 1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{$labels.instance}}: 检测到 SQL 线程停止！请重点关注！！！"
+      description: "{{$labels.instance}}: 当前 SQL线程 已停止！ (当前值为:{{ $value }})"
+
+  - alert: "IO线程停止预警"
+    expr: mysql_slave_status_slave_io_running != 1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "{{$labels.instance}}: 检测到 IO 线程停止！请重点关注！！！"
+      description: "{{$labels.instance}}: 当前 IO线程 已停止！ (当前值为:{{ $value }})"
+

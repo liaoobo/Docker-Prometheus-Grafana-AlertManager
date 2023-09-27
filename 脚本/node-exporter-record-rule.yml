@@ -1,0 +1,57 @@
+groups:
+- name: nginx-alarm
+  rules:
+  - alert: "内存告警"
+    expr: (1 - (node_memory_MemAvailable_bytes / (node_memory_MemTotal_bytes))) * 100 > 80   #正常情况下是80，这里写了5，是因为我看到真实使用是8，为了做告警出发，写了5
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      title: "内存使用率预警"
+      serviceName: "{{ $labels.serviceName }}"
+      instance: "{{ $labels.instance }}"
+      value: "{{ $value }}"
+      btn: "点击查看详情 :玫瑰:"
+      link: "http://192.168.98.154:3000/grafana/d/aka/duo-job-ji-cheng-fu-wu-qi-jian-kong"
+      template: "**${serviceName}**(${instance}) 内存使用率已经超过阈值 **80%**, 请及时处理！\n当前值: ${value}%"
+
+  - alert: "CPU告警"
+    expr: (1 - avg(irate(node_cpu_seconds_total{mode="idle"}[2m])) by(instance)) * 100 > 80
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      title: "CPU使用率预警"
+      serviceName: "{{ $labels.serviceName }}"
+      value: "{{ $value }}"
+      btn: "点击查看详情 :玫瑰:"
+      link: "http://192.168.98.154:3000/grafana/d/aka/duo-job-ji-cheng-fu-wu-qi-jian-kong"
+      template: "**${serviceName}**(${instance}) cpu使用率已经超过阈值 **80%**, 请及时处理！\n当前值: ${value}%"
+
+  - alert: "磁盘告警"
+    expr: 100 - (node_filesystem_free_bytes{fstype=~"tmpfs|ext4"} / node_filesystem_size_bytes{fstype=~"tmpfs|ext4"} * 100) > 5
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      title: "磁盘使用率预警"
+      serviceName: "{{ $labels.serviceName }}"
+      instance: "{{ $labels.instance }}"
+      mountpoint: "{{ $labels.mountpoint }}"
+      value: "{{ $value }}"
+      btn: "点击查看详情 :玫瑰:"
+      link: "http://192.168.98.154:3000/grafana/d/aka/duo-job-ji-cheng-fu-wu-qi-jian-kong"
+      template: "**${serviceName}**(${instance}) 服务器磁盘设备使用率超过 **90%**, 请及时处理！\n挂载点: ${mountpoint}\n当前值: ${value}%!"
+
+  - alert: "实例存活报警"
+    expr: up == 0
+    for: 3s
+    labels:
+      severity: emergency
+    annotations:
+      title: "节点宕机报警"
+      serviceName: "{{ $labels.serviceName }}"
+      instance: "{{ $labels.instance }}"
+      btn: "点击查看详情 :玫瑰:"
+      link: "http://192.168.98.155:9090/targets"
+      template: "节点 **${serviceName}**(${instance}) 断联, 请及时处理!"
